@@ -1,23 +1,15 @@
-import logo from './logo.svg';
-import './App.css';
+import Generator from "./Components/generator";
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <div className="titleContainer">
+        <h1 className="title">Learn-Bot</h1>
+      </div>
+      <div className="titleContainer">
+        <h3>What do you want to learn about?</h3>
+      </div>
+      <Generator />
     </div>
   );
 }
