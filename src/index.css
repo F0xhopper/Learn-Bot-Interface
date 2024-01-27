@@ -30,3 +30,21 @@ code {
   width: 100px;
   height: 20px;
 }
+.switchesContainer {
+  width: max-content;
+  margin: auto;
+}
+.mainDisplayContainer {
+  width: 200px;
+  font-size: 10px;
+  float: left;
+}
+.mainResourceDisplayContainer {
+  width: max-content;
+  margin: auto;
+}
+.howTitle {
+  padding: 20px;
+  width: max-content;
+  margin: auto;
+}
