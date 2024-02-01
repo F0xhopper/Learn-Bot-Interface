@@ -3,7 +3,11 @@ body {
   font-family: "Courier New", Courier, monospace;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(167deg, rgb(20, 29, 36) 30%, rgb(7, 7, 7) 89%);
+  background: linear-gradient(
+    167deg,
+    rgb(148, 148, 148) 30%,
+    rgb(216, 216, 216) 89%
+  );
 }
 
 code {
@@ -16,65 +20,26 @@ code {
   width: 1210px;
   margin: auto;
 }
+.input {
+  background-color: transparent;
+  border: transparent;
+  float: left;
+  width: max-content;
+}
 .titleContainer {
   width: max-content;
-  margin: auto;
-  color: white;
-}
-.title {
-  font-size: 30px;
-  color: white;
-}
-.topicInputContainer {
-  width: max-content;
-  background-color: rgba(68, 68, 68, 0.26);
-  padding: 10px;
-  border-radius: 10px;
-  margin: auto;
-}
-.topicInput {
-  border-radius: 10px;
-  height: 30px;
-  width: 300px;
-  text-align: center;
 
   margin: auto;
 }
-.learnButtonContainer {
-  width: max-content;
-  margin: auto;
+.Typewriter {
+  float: left;
 }
-.mainFunctionContainer {
-  background-color: rgba(44, 44, 44, 0.164);
-  width: max-content;
-  padding: 20px;
+.typedContainer {
+  font-size: 40px;
 
-  margin: auto;
-  border-radius: 10px;
-  margin-top: 200px;
-}
-.learnButton {
-  width: 130px;
-  border-radius: 10px;
-  font-family: "Courier New", Courier, monospace;
-  height: 30px;
-  background-color: aliceblue;
-  font-size: 20px;
-  margin: 20px;
-  text-align: center;
-  cursor: pointer;
-}
-.learnButton:hover {
-  background-color: aliceblue;
-}
-.switchesContainer {
   width: max-content;
-  background-color: rgba(68, 68, 68, 0.26);
-  color: white;
-  border-radius: 10px;
-  height: 130px;
   margin: auto;
-  margin-top: 20px;
+  margin-top: 400px;
 }
 .mainDisplayContainer {
   width: 200px;
@@ -90,15 +55,7 @@ code {
   width: max-content;
   height: 1000px;
   border-radius: 10px;
+  background-color: rgba(44, 44, 44, 0.164);
   margin: auto;
-}
-.howTitle {
-  padding: 20px;
-  color: white;
-  width: max-content;
-  margin: auto;
-}
-.topicInputContainer {
-  margin: auto;
-  width: max-content;
+  margin: 20px;
 }

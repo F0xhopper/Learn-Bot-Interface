@@ -1,12 +1,12 @@
-import { useState } from "react";
-import { FormControlLabel, Switch } from "@mui/material";
+import { useState, useEffect } from "react";
+
 const Generator = () => {
   const [state, setState] = useState({
-    bookCheck: [true, "books"],
-    documentariesCheck: [true, "documentaries"],
-    podcastsCheck: [true, "podcasts"],
-    youtubeVideosCheck: [true, "youtube videos"],
-    wikipediaArticlesCheck: [true, "wikipedia articles"],
+    bookCheck: [false, "books"],
+    documentariesCheck: [false, "documentaries"],
+    podcastsCheck: [false, "podcasts"],
+    youtubeVideosCheck: [false, "youtube videos"],
+    wikipediaArticlesCheck: [false, "wikipedia articles"],
   });
   const [topicInput, setTopicInput] = useState();
   const [books, setBooks] = useState();
@@ -14,7 +14,11 @@ const Generator = () => {
   const [podcasts, setPodcasts] = useState();
   const [youtubeVideos, setYoutubeVideos] = useState();
   const [wikipediaArticles, setWikipediaArticles] = useState();
-  const [learnButtonText, setLearnButtonText] = useState("Learn");
+  const [showInput, setShowInput] = useState(false);
+  const [howInput, setHowInput] = useState();
+  const [stage, setStage] = useState("1");
+  const [text1, setText1] = useState("");
+  const [text2, setText2] = useState("");
   function setAllResourceUndefined() {
     setBooks(undefined);
     setDocumentaries(undefined);
@@ -22,200 +26,161 @@ const Generator = () => {
     setYoutubeVideos(undefined);
     setWikipediaArticles(undefined);
   }
-  const handleChange = (event) => {
-    setState({
-      ...state,
-      [event.target.name]: [event.target.checked, state[event.target.name][1]],
-    });
-  };
-  async function getResources() {
-    setAllResourceUndefined();
-    setLearnButtonText("fetching....");
-    for (const typeOf in state) {
-      if (state[typeOf][0] == true) {
-        await fetch("http://127.0.0.1:5000/post", {
-          method: "post",
+  async function getResources(e) {
+    if (e.key == "Enter") {
+      setStage("3");
+      let stateNew = state;
+      for (const typeOf in state) {
+        if (
+          howInput
+            .toUpperCase()
+            .includes(state[typeOf][1].toString().toUpperCase())
+        ) {
+          stateNew[typeOf] = [true, state[typeOf][1]];
+        }
+      }
+      setState(stateNew);
 
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*",
-          },
-          body: JSON.stringify({ topic: topicInput, type: state[typeOf][1] }),
-        })
-          .then((response) => {
-            return response.json();
+      setAllResourceUndefined();
+
+      for (const typeOf in state) {
+        if (state[typeOf][0] == true) {
+          await fetch("http://127.0.0.1:5000/post", {
+            method: "post",
+
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+              "Access-Control-Allow-Origin": "*",
+            },
+            body: JSON.stringify({ topic: topicInput, type: state[typeOf][1] }),
           })
-          .then((data) => {
-            console.log(data);
-            if (typeOf == "bookCheck") {
-              setBooks(data);
-            } else if (typeOf == "documentariesCheck") {
-              setDocumentaries(data);
-            } else if (typeOf == "podcastsCheck") {
-              setPodcasts(data);
-            } else if (typeOf == "youtubeVideosCheck") {
-              setYoutubeVideos(data);
-            } else if (typeOf == "wikipediaArticlesCheck") {
-              setWikipediaArticles(data);
-            }
-          });
+            .then((response) => {
+              return response.json();
+            })
+            .then((data) => {
+              console.log(data);
+              if (typeOf == "bookCheck") {
+                setBooks(data);
+              } else if (typeOf == "documentariesCheck") {
+                setDocumentaries(data);
+              } else if (typeOf == "podcastsCheck") {
+                setPodcasts(data);
+              } else if (typeOf == "youtubeVideosCheck") {
+                setYoutubeVideos(data);
+              } else if (typeOf == "wikipediaArticlesCheck") {
+                setWikipediaArticles(data);
+              }
+            });
+        }
       }
     }
-    setTopicInput("");
-    setLearnButtonText("Learn");
   }
+  function sleep(ms) {
+    return new Promise((r) => setTimeout(r, ms));
+  }
+  const questionText = "What do you want to learn about?";
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setText1(questionText.slice(0, text1.length + 1));
+    }, 100);
+    return () => clearTimeout(timeout);
+  }, [text1]);
+  const [secondQuestion, setSecondQuestion] = useState(
+    "How do you want to know about"
+  );
+  function nextStage(e) {
+    if (e.key == "Enter") {
+      setStage("2");
+      setText2("");
+      setShowInput(false);
+      setSecondQuestion("How do you want to learn about " + topicInput + " ?");
+    }
+  }
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setText2(secondQuestion.slice(0, text2.length + 1));
+    }, 100);
+    return () => clearTimeout(timeout);
+  }, [text2]);
   return (
     <div>
+      <div className="typedContainer">
+        {stage == "1" ? <div>{text1}</div> : null}
+        {stage == "2" ? <div>{text2}</div> : null}
+        {text1 == questionText && stage == "1" ? (
+          <input
+            className="input"
+            onKeyDown={nextStage}
+            onChange={(e) => {
+              setTopicInput(e.target.value);
+            }}
+          ></input>
+        ) : null}
+        {stage == "2" && secondQuestion == text2 ? (
+          <input
+            placeholder=""
+            onKeyDown={getResources}
+            onChange={(e) => {
+              setHowInput(e.target.value);
+            }}
+          ></input>
+        ) : null}
+      </div>
+
       <div
         style={{
-          marginTop:
+          display:
             books ||
             documentaries ||
             podcasts ||
             youtubeVideos ||
             wikipediaArticles
-              ? "0px"
-              : "300px",
+              ? "Block"
+              : "None",
         }}
-        className="mainFunctionContainer"
+        className="mainResourceDisplayContainer"
       >
-        <div className="topicInputContainer">
-          <div className="titleContainer">
-            <h4>What do you want to learn about?</h4>
+        {books ? (
+          <div className="mainDisplayContainer">
+            <h2>Books</h2>
+            {books.map((book) => (
+              <p>{book}</p>
+            ))}
           </div>
-          <div className="topicInputContainer">
-            <input
-              value={topicInput}
-              className="topicInput"
-              onChange={(e) => setTopicInput(e.target.value)}
-            ></input>
+        ) : null}
+        {documentaries ? (
+          <div className="mainDisplayContainer">
+            <h2>Dcumentaries</h2>
+            {documentaries.map((book) => (
+              <p>{book}</p>
+            ))}
           </div>
-        </div>
-        <div className="switchesContainer">
-          {" "}
-          {topicInput ? (
-            <h4 className="howTitle">
-              How do you want to learn about {topicInput}?
-            </h4>
-          ) : (
-            <h4 className="howTitle">How do you want to learn about it?</h4>
-          )}
-          <div className="switchContainer">
-            <FormControlLabel
-              control={
-                <Switch
-                  size="small"
-                  color="default"
-                  onChange={handleChange}
-                  checked={state.bookCheck[0]}
-                  name={"bookCheck"}
-                />
-              }
-              label="Books"
-              labelPlacement="top"
-            />
-            <FormControlLabel
-              control={
-                <Switch
-                  size="small"
-                  color="default"
-                  onChange={handleChange}
-                  checked={state.documentariesCheck[0]}
-                  name={"documentariesCheck"}
-                />
-              }
-              label="Documentaries"
-              labelPlacement="top"
-            />
-            <FormControlLabel
-              control={
-                <Switch
-                  size="small"
-                  color="default"
-                  onChange={handleChange}
-                  checked={state.podcastsCheck[0]}
-                  name={"podcastsCheck"}
-                />
-              }
-              label="Podcasts"
-              labelPlacement="top"
-            />
-            <FormControlLabel
-              control={
-                <Switch
-                  size="small"
-                  color="default"
-                  onChange={handleChange}
-                  checked={state.youtubeVideosCheck[0]}
-                  name={"youtubeVideosCheck"}
-                />
-              }
-              label="Youtube Videos"
-              labelPlacement="top"
-            />
-            <FormControlLabel
-              control={
-                <Switch
-                  size="small"
-                  color="default"
-                  onChange={handleChange}
-                  checked={state.wikipediaArticlesCheck[0]}
-                  name={"wikipediaArticlesCheck"}
-                />
-              }
-              label="Wiki Articles"
-              labelPlacement="top"
-            />
+        ) : null}
+        {podcasts ? (
+          <div className="mainDisplayContainer">
+            <h2>Podcasts</h2>
+            {podcasts.map((book) => (
+              <p>{book}</p>
+            ))}
           </div>
-          <div className="learnButtonContainer">
-            <button className="learnButton" onClick={getResources}>
-              <h4>{learnButtonText}</h4>
-            </button>
-          </div>{" "}
-        </div>
-        <div className="mainResourceDisplayContainer">
-          {books ? (
-            <div className="mainDisplayContainer">
-              <h2>Books</h2>
-              {books.map((book) => (
-                <p>{book}</p>
-              ))}
-            </div>
-          ) : null}
-          {documentaries ? (
-            <div className="mainDisplayContainer">
-              <h2>Dcumentaries</h2>
-              {documentaries.map((book) => (
-                <p>{book}</p>
-              ))}
-            </div>
-          ) : null}
-          {podcasts ? (
-            <div className="mainDisplayContainer">
-              <h2>Podcasts</h2>
-              {podcasts.map((book) => (
-                <p>{book}</p>
-              ))}
-            </div>
-          ) : null}
-          {youtubeVideos ? (
-            <div className="mainDisplayContainer">
-              <h2>Youtube Videos</h2>
-              {youtubeVideos.map((book) => (
-                <p>{book}</p>
-              ))}
-            </div>
-          ) : null}
-          {wikipediaArticles ? (
-            <div className="mainDisplayContainer">
-              <h2>Wikipedia Articles</h2>
-              {wikipediaArticles.map((book) => (
-                <p>{book}</p>
-              ))}
-            </div>
-          ) : null}
-        </div>
+        ) : null}
+        {youtubeVideos ? (
+          <div className="mainDisplayContainer">
+            <h2>Youtube Videos</h2>
+            {youtubeVideos.map((book) => (
+              <p>{book}</p>
+            ))}
+          </div>
+        ) : null}
+        {wikipediaArticles ? (
+          <div className="mainDisplayContainer">
+            <h2>Wikipedia Articles</h2>
+            {wikipediaArticles.map((book) => (
+              <p>{book}</p>
+            ))}
+          </div>
+        ) : null}
       </div>
     </div>
   );
