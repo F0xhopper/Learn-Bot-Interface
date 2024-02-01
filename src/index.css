@@ -5,7 +5,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background: linear-gradient(
     167deg,
-    rgb(148, 148, 148) 30%,
+    rgb(197, 197, 197) 30%,
     rgb(216, 216, 216) 89%
   );
 }
@@ -20,11 +20,31 @@ code {
   width: 1210px;
   margin: auto;
 }
+.questionContainer {
+  float: left;
+}
 .input {
+  position: absolute;
+  padding-top: 3px;
+  font-size: 34px;
+  font-family: "Courier New", Courier, monospace;
   background-color: transparent;
   border: transparent;
   float: left;
   width: max-content;
+  max-width: max-content;
+  outline: none;
+}
+.learnSomeThingElseButtonContainer {
+  margin: auto;
+  width: max-content;
+}
+.learnSomeThingElseButton {
+  background-color: transparent;
+  cursor: pointer;
+  border: 0px;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 22px;
 }
 .titleContainer {
   width: max-content;

@@ -1,89 +1,60 @@
 import { useState, useEffect } from "react";
 
 const Generator = () => {
-  const [state, setState] = useState({
-    bookCheck: [false, "books"],
-    documentariesCheck: [false, "documentaries"],
-    podcastsCheck: [false, "podcasts"],
-    youtubeVideosCheck: [false, "youtube videos"],
-    wikipediaArticlesCheck: [false, "wikipedia articles"],
-  });
+  const [state, setState] = useState({});
   const [topicInput, setTopicInput] = useState();
-  const [books, setBooks] = useState();
-  const [documentaries, setDocumentaries] = useState();
-  const [podcasts, setPodcasts] = useState();
-  const [youtubeVideos, setYoutubeVideos] = useState();
-  const [wikipediaArticles, setWikipediaArticles] = useState();
   const [showInput, setShowInput] = useState(false);
   const [howInput, setHowInput] = useState();
   const [stage, setStage] = useState("1");
   const [text1, setText1] = useState("");
   const [text2, setText2] = useState("");
-  function setAllResourceUndefined() {
-    setBooks(undefined);
-    setDocumentaries(undefined);
-    setPodcasts(undefined);
-    setYoutubeVideos(undefined);
-    setWikipediaArticles(undefined);
-  }
+  const [fetchLearnButtonText, setFetchLearnButtonText] =
+    useState("Fetching....");
+  const [renderState, setRenderState] = useState(false);
   async function getResources(e) {
     if (e.key == "Enter") {
+      setFetchLearnButtonText("Just fetching...");
       setStage("3");
       let stateNew = state;
-      for (const typeOf in state) {
-        if (
-          howInput
-            .toUpperCase()
-            .includes(state[typeOf][1].toString().toUpperCase())
-        ) {
-          stateNew[typeOf] = [true, state[typeOf][1]];
-        }
-      }
-      setState(stateNew);
+      const resourceTypess = howInput.split(" ");
+      resourceTypess.forEach((type) => {
+        stateNew[type] = false;
+      });
 
-      setAllResourceUndefined();
+      for (const typeOf in stateNew) {
+        await fetch("http://127.0.0.1:5000/post", {
+          method: "post",
 
-      for (const typeOf in state) {
-        if (state[typeOf][0] == true) {
-          await fetch("http://127.0.0.1:5000/post", {
-            method: "post",
-
-            headers: {
-              Accept: "application/json",
-              "Content-Type": "application/json",
-              "Access-Control-Allow-Origin": "*",
-            },
-            body: JSON.stringify({ topic: topicInput, type: state[typeOf][1] }),
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+          body: JSON.stringify({ topic: topicInput, type: typeOf }),
+        })
+          .then((response) => {
+            return response.json();
           })
-            .then((response) => {
-              return response.json();
-            })
-            .then((data) => {
-              console.log(data);
-              if (typeOf == "bookCheck") {
-                setBooks(data);
-              } else if (typeOf == "documentariesCheck") {
-                setDocumentaries(data);
-              } else if (typeOf == "podcastsCheck") {
-                setPodcasts(data);
-              } else if (typeOf == "youtubeVideosCheck") {
-                setYoutubeVideos(data);
-              } else if (typeOf == "wikipediaArticlesCheck") {
-                setWikipediaArticles(data);
-              }
-            });
-        }
+          .then((data) => {
+            stateNew[typeOf] = data;
+          });
       }
+
+      setState(stateNew);
+      setRenderState(true);
+      setFetchLearnButtonText("Learn Something Else");
     }
   }
-  function sleep(ms) {
-    return new Promise((r) => setTimeout(r, ms));
+
+  function learnSomethingElse() {
+    window.location.reload();
   }
-  const questionText = "What do you want to learn about?";
+
+  const questionText = "What do you want to learn about?:";
   useEffect(() => {
     const timeout = setTimeout(() => {
       setText1(questionText.slice(0, text1.length + 1));
-    }, 100);
+    }, 80);
     return () => clearTimeout(timeout);
   }, [text1]);
   const [secondQuestion, setSecondQuestion] = useState(
@@ -94,96 +65,82 @@ const Generator = () => {
       setStage("2");
       setText2("");
       setShowInput(false);
-      setSecondQuestion("How do you want to learn about " + topicInput + " ?");
+      setSecondQuestion("How do you want to learn about " + topicInput + " ?:");
     }
   }
   useEffect(() => {
     const timeout = setTimeout(() => {
       setText2(secondQuestion.slice(0, text2.length + 1));
-    }, 100);
+    }, 80);
     return () => clearTimeout(timeout);
   }, [text2]);
   return (
     <div>
-      <div className="typedContainer">
-        {stage == "1" ? <div>{text1}</div> : null}
-        {stage == "2" ? <div>{text2}</div> : null}
-        {text1 == questionText && stage == "1" ? (
-          <input
-            className="input"
-            onKeyDown={nextStage}
-            onChange={(e) => {
-              setTopicInput(e.target.value);
-            }}
-          ></input>
-        ) : null}
-        {stage == "2" && secondQuestion == text2 ? (
-          <input
-            placeholder=""
-            onKeyDown={getResources}
-            onChange={(e) => {
-              setHowInput(e.target.value);
-            }}
-          ></input>
-        ) : null}
-      </div>
+      {stage == "3" ? (
+        <div
+          style={{
+            marginTop: renderState ? "0px" : "400px",
+          }}
+          className="learnSomeThingElseButtonContainer"
+        >
+          <button
+            className="learnSomeThingElseButton"
+            onClick={learnSomethingElse}
+          >
+            {fetchLearnButtonText}
+          </button>
+        </div>
+      ) : (
+        <div className="typedContainer">
+          {stage == "1" ? (
+            <div className="questionContainer">{text1}</div>
+          ) : null}
+          {stage == "2" ? (
+            <div className="questionContainer">{text2}</div>
+          ) : null}
+          {text1 == questionText && stage == "1" ? (
+            <input
+              autoFocus
+              className="input"
+              onKeyDown={nextStage}
+              onChange={(e) => {
+                setTopicInput(e.target.value);
+              }}
+            ></input>
+          ) : null}
+          {stage == "2" && secondQuestion == text2 ? (
+            <input
+              className="input"
+              autoFocus
+              placeholder=""
+              onKeyDown={getResources}
+              onChange={(e) => {
+                setHowInput(e.target.value);
+              }}
+            ></input>
+          ) : null}{" "}
+        </div>
+      )}
+      {renderState ? <h4>This is what we found on {topicInput}:</h4> : null}
+      {renderState
+        ? Object.keys(state).map((topic) => (
+            <div>
+              <h3>{topic}</h3>
+              {state[topic].map((piece) => (
+                <p>{piece}</p>
+              ))}
+            </div>
+          ))
+        : null}
 
-      <div
-        style={{
-          display:
-            books ||
-            documentaries ||
-            podcasts ||
-            youtubeVideos ||
-            wikipediaArticles
-              ? "Block"
-              : "None",
-        }}
-        className="mainResourceDisplayContainer"
-      >
-        {books ? (
+      {/* <div className="mainResourceDisplayContainer">
+        {state.map((topic) => (
           <div className="mainDisplayContainer">
-            <h2>Books</h2>
-            {books.map((book) => (
-              <p>{book}</p>
-            ))}
+            <h2>{topic}</h2>
           </div>
-        ) : null}
-        {documentaries ? (
-          <div className="mainDisplayContainer">
-            <h2>Dcumentaries</h2>
-            {documentaries.map((book) => (
-              <p>{book}</p>
-            ))}
-          </div>
-        ) : null}
-        {podcasts ? (
-          <div className="mainDisplayContainer">
-            <h2>Podcasts</h2>
-            {podcasts.map((book) => (
-              <p>{book}</p>
-            ))}
-          </div>
-        ) : null}
-        {youtubeVideos ? (
-          <div className="mainDisplayContainer">
-            <h2>Youtube Videos</h2>
-            {youtubeVideos.map((book) => (
-              <p>{book}</p>
-            ))}
-          </div>
-        ) : null}
-        {wikipediaArticles ? (
-          <div className="mainDisplayContainer">
-            <h2>Wikipedia Articles</h2>
-            {wikipediaArticles.map((book) => (
-              <p>{book}</p>
-            ))}
-          </div>
-        ) : null}
-      </div>
+        ))}
+      </div> */}
     </div>
   );
 };
-
 export default Generator;
