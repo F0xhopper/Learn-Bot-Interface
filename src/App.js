@@ -5,7 +5,7 @@ function App() {
     <div className="App">
       {" "}
       <div className="titleContainer">
-        <h1 className="title">Learn-Bot</h1>
+        <h1 className="title">Resource-Bot</h1>
       </div>
       <Generator />
     </div>

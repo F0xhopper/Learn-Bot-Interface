@@ -1,38 +1,34 @@
 body {
-  margin: 0;
   font-family: "Courier New", Courier, monospace;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(
-    167deg,
-    rgb(197, 197, 197) 30%,
-    rgb(216, 216, 216) 89%
-  );
+  background: rgb(207, 207, 205);
 }
-
+:root {
+  height: 100%;
+}
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
 .App {
-  height: 1300px;
+  height: 100%;
 
-  width: 1210px;
+  width: 100%;
   margin: auto;
 }
 .questionContainer {
   float: left;
 }
 .input {
-  position: absolute;
-  padding-top: 3px;
-  font-size: 34px;
+  position: relative;
+
+  font-size: 40px;
   font-family: "Courier New", Courier, monospace;
   background-color: transparent;
   border: transparent;
   float: left;
   width: max-content;
-  max-width: max-content;
   outline: none;
 }
 .learnSomeThingElseButtonContainer {
@@ -43,8 +39,13 @@ code {
   background-color: transparent;
   cursor: pointer;
   border: 0px;
+
   font-family: "Courier New", Courier, monospace;
   font-size: 22px;
+}
+.learnSomeThingElseButtonContainer {
+  width: max-content;
+  margin: auto;
 }
 .titleContainer {
   width: max-content;
@@ -64,18 +65,40 @@ code {
 .mainDisplayContainer {
   width: 200px;
   font-size: 10px;
-  background-color: rgba(68, 68, 68, 0.26);
+
   float: left;
   padding: 10px;
   border-radius: 10px;
   color: white;
   margin: 10px;
 }
+.resultsContainer {
+  width: 1200px;
+  margin: auto;
+  padding-bottom: 40px;
+}
 .mainResourceDisplayContainer {
   width: max-content;
   height: 1000px;
   border-radius: 10px;
-  background-color: rgba(44, 44, 44, 0.164);
   margin: auto;
   margin: 20px;
+}
+
+.loading {
+  width: max-content;
+  margin: auto;
+
+  font-size: 30px;
+  clip-path: inset(0 3ch 0 0);
+  animation: l 1.5s steps(4) infinite;
+  margin-top: 400px;
+}
+.resultTopicTitle {
+  text-transform: capitalize;
+}
+@keyframes l {
+  to {
+    clip-path: inset(0 -1ch 0 0);
+  }
 }

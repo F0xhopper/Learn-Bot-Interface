@@ -2,21 +2,48 @@ import { useState, useEffect } from "react";
 
 const Generator = () => {
   const [state, setState] = useState({});
-  const [topicInput, setTopicInput] = useState();
+  const [topicInput, setTopicInput] = useState("1");
   const [showInput, setShowInput] = useState(false);
-  const [howInput, setHowInput] = useState();
+  const [howInput, setHowInput] = useState("1");
   const [stage, setStage] = useState("1");
   const [text1, setText1] = useState("");
   const [text2, setText2] = useState("");
   const [fetchLearnButtonText, setFetchLearnButtonText] =
     useState("Fetching....");
   const [renderState, setRenderState] = useState(false);
+
+  function delay(ms) {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
+  }
+
+  async function loadingText() {
+    setFetchLearnButtonText("Just fetching");
+    await delay(400);
+    setFetchLearnButtonText("Just fetching..");
+    await delay(400);
+    setFetchLearnButtonText("Just fetching...");
+    await delay(400);
+    setFetchLearnButtonText("Just fetching....");
+    await delay(400);
+  }
   async function getResources(e) {
     if (e.key == "Enter") {
-      setFetchLearnButtonText("Just fetching...");
+      for (let i = 0; i < 20; i++) {
+        loadingText();
+      }
       setStage("3");
       let stateNew = state;
-      const resourceTypess = howInput.split(" ");
+      let resourceTypess = howInput.split(" ");
+      resourceTypess = resourceTypess.filter(
+        (word) =>
+          word !== "and" &&
+          word !== "," &&
+          word !== "or" &&
+          word !== "&" &&
+          word !== "through"
+      );
       resourceTypess.forEach((type) => {
         stateNew[type] = false;
       });
@@ -65,7 +92,9 @@ const Generator = () => {
       setStage("2");
       setText2("");
       setShowInput(false);
-      setSecondQuestion("How do you want to learn about " + topicInput + " ?:");
+      setSecondQuestion(
+        "How would you prefer to learn about " + topicInput + "?:"
+      );
     }
   }
   useEffect(() => {
@@ -76,22 +105,13 @@ const Generator = () => {
   }, [text2]);
   return (
     <div>
-      {stage == "3" ? (
-        <div
-          style={{
-            marginTop: renderState ? "0px" : "400px",
-          }}
-          className="learnSomeThingElseButtonContainer"
-        >
-          <button
-            className="learnSomeThingElseButton"
-            onClick={learnSomethingElse}
-          >
-            {fetchLearnButtonText}
-          </button>
-        </div>
+      {stage == "3" && renderState !== true ? (
+        <div className="loading">Fetching...</div>
       ) : (
-        <div className="typedContainer">
+        <div
+          style={{ display: stage != "3" ? "block" : "none" }}
+          className="typedContainer"
+        >
           {stage == "1" ? (
             <div className="questionContainer">{text1}</div>
           ) : null}
@@ -100,6 +120,7 @@ const Generator = () => {
           ) : null}
           {text1 == questionText && stage == "1" ? (
             <input
+              style={{ width: topicInput.length + "ch" }}
               autoFocus
               className="input"
               onKeyDown={nextStage}
@@ -110,9 +131,9 @@ const Generator = () => {
           ) : null}
           {stage == "2" && secondQuestion == text2 ? (
             <input
+              style={{ width: howInput.length + "ch" }}
               className="input"
               autoFocus
-              placeholder=""
               onKeyDown={getResources}
               onChange={(e) => {
                 setHowInput(e.target.value);
@@ -121,25 +142,33 @@ const Generator = () => {
           ) : null}{" "}
         </div>
       )}
-      {renderState ? <h4>This is what we found on {topicInput}:</h4> : null}
-      {renderState
-        ? Object.keys(state).map((topic) => (
-            <div>
-              <h3>{topic}</h3>
-              {state[topic].map((piece) => (
-                <p>{piece}</p>
-              ))}
-            </div>
-          ))
-        : null}
-
-      {/* <div className="mainResourceDisplayContainer">
-        {state.map((topic) => (
-          <div className="mainDisplayContainer">
-            <h2>{topic}</h2>
+      <div className="resultsContainer">
+        {renderState ? (
+          <div className="learnSomeThingElseButtonContainer">
+            <button
+              className="learnSomeThingElseButton"
+              onClick={learnSomethingElse}
+            >
+              {fetchLearnButtonText}
+            </button>
           </div>
-        ))}
-      </div> */}
+        ) : null}
+        {renderState ? <h3>Here is what I found on {topicInput}:</h3> : null}
+        {renderState
+          ? Object.keys(state).map((topic) => (
+              <div>
+                <h3 className="resultTopicTitle">{topic}</h3>
+                {state[topic].length != 0 ? (
+                  state[topic].map((piece) => <p>{piece}</p>)
+                ) : (
+                  <div>
+                    Sorry we couldnt find any {topic} on {topicInput}
+                  </div>
+                )}
+              </div>
+            ))
+          : null}
+      </div>
     </div>
   );
 };
