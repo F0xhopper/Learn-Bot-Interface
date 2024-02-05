@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Linkify from "linkify-react";
 
 const Generator = () => {
   const [state, setState] = useState({});
@@ -11,6 +12,18 @@ const Generator = () => {
   const [fetchLearnButtonText, setFetchLearnButtonText] =
     useState("Fetching....");
   const [renderState, setRenderState] = useState(false);
+  const [fetchTextsIndex, setFetchTextsIndex] = useState(0);
+  const fetchTexts = ["Fetching", "Fetching.", "Fetching..", "Fetching..."];
+  useEffect(() => {
+    let currentIndex = 0;
+
+    const intervalId = setInterval(() => {
+      setFetchTextsIndex((prevIndex) => (prevIndex + 1) % fetchTexts.length);
+    }, 700); // Change text every 2 seconds (adjust as needed)
+
+    // Cleanup function to clear the interval when the component unmounts
+    return () => clearInterval(intervalId);
+  }, []);
 
   function delay(ms) {
     return new Promise((resolve) => {
@@ -18,21 +31,8 @@ const Generator = () => {
     });
   }
 
-  async function loadingText() {
-    setFetchLearnButtonText("Just fetching");
-    await delay(400);
-    setFetchLearnButtonText("Just fetching..");
-    await delay(400);
-    setFetchLearnButtonText("Just fetching...");
-    await delay(400);
-    setFetchLearnButtonText("Just fetching....");
-    await delay(400);
-  }
   async function getResources(e) {
     if (e.key == "Enter") {
-      for (let i = 0; i < 20; i++) {
-        loadingText();
-      }
       setStage("3");
       let stateNew = state;
       let resourceTypess = howInput.split(" ");
@@ -97,6 +97,7 @@ const Generator = () => {
       );
     }
   }
+
   useEffect(() => {
     const timeout = setTimeout(() => {
       setText2(secondQuestion.slice(0, text2.length + 1));
@@ -106,7 +107,7 @@ const Generator = () => {
   return (
     <div>
       {stage == "3" && renderState !== true ? (
-        <div className="loading">Fetching...</div>
+        <div className="loading">{fetchTexts[fetchTextsIndex]}</div>
       ) : (
         <div
           style={{ display: stage != "3" ? "block" : "none" }}
@@ -141,9 +142,9 @@ const Generator = () => {
             ></input>
           ) : null}{" "}
         </div>
-      )}
-      <div className="resultsContainer">
-        {renderState ? (
+      )}{" "}
+      {renderState ? (
+        <div className="resultsContainer">
           <div className="learnSomeThingElseButtonContainer">
             <button
               className="learnSomeThingElseButton"
@@ -152,23 +153,26 @@ const Generator = () => {
               {fetchLearnButtonText}
             </button>
           </div>
-        ) : null}
-        {renderState ? <h3>Here is what I found on {topicInput}:</h3> : null}
-        {renderState
-          ? Object.keys(state).map((topic) => (
-              <div>
-                <h3 className="resultTopicTitle">{topic}</h3>
-                {state[topic].length != 0 ? (
-                  state[topic].map((piece) => <p>{piece}</p>)
-                ) : (
-                  <div>
-                    Sorry we couldnt find any {topic} on {topicInput}
-                  </div>
-                )}
-              </div>
-            ))
-          : null}
-      </div>
+
+          <h3>Here is what I found on {topicInput}:</h3>
+          {Object.keys(state).map((topic) => (
+            <div>
+              <h3 className="resultTopicTitle">{topic}</h3>
+              {state[topic].map((piece) => (
+                <p>
+                  <Linkify
+                    options={{
+                      className: "inidividualResults",
+                    }}
+                  >
+                    {piece}
+                  </Linkify>
+                </p>
+              ))}
+            </div>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 };
