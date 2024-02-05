@@ -43,6 +43,9 @@ code {
   font-family: "Courier New", Courier, monospace;
   font-size: 22px;
 }
+.learnSomeThingElseButton:hover {
+  text-decoration: underline;
+}
 .learnSomeThingElseButtonContainer {
   width: max-content;
   margin: auto;
