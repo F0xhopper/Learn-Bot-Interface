@@ -1,5 +1,9 @@
 import Generator from "./Components/generator";
 
+/**
+ * Main application component
+ * @returns {JSX.Element} The rendered application
+ */
 function App() {
   return (
     <div className="App">

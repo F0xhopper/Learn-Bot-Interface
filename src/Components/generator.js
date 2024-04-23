@@ -1,57 +1,81 @@
 import { useState, useEffect } from "react";
 import Linkify from "linkify-react";
 
+/**
+ * Generator Component
+ *
+ * Main component that allows users to input a topic they want to learn about and
+ * choose a method of learning. It fetches information related to the topic
+ * from an external API and presents the findings to the user
+ *
+ * @returns {JSX.Element} Generator component JSX
+ */
 const Generator = () => {
-  const [state, setState] = useState({});
-  const [topicInput, setTopicInput] = useState("1");
-  const [showInput, setShowInput] = useState(false);
-  const [howInput, setHowInput] = useState("1");
-  const [stage, setStage] = useState("1");
-  const [text1, setText1] = useState("");
-  const [text2, setText2] = useState("");
+  const [state, setState] = useState({}); // Fetched data related to the topic
+  const [topicInput, setTopicInput] = useState(""); // Topic desired to be learnt
+  const [howInput, setHowInput] = useState(""); // Learning method
+  const [stage, setStage] = useState("1"); // Tracks the current stage of interaction
+  const [stage1Text, setStage1Text] = useState(""); // Text displayed for the first stage
+  const [stage2Text, setStage2Text] = useState(""); // Text displayed for the second stage
   const [fetchLearnButtonText, setFetchLearnButtonText] =
-    useState("Fetching....");
-  const [renderState, setRenderState] = useState(false);
-  const [fetchTextsIndex, setFetchTextsIndex] = useState(0);
-  const fetchTexts = ["Fetching", "Fetching.", "Fetching..", "Fetching..."];
-  useEffect(() => {
-    let currentIndex = 0;
+    useState("Fetching...."); // Text displayed on the learn button
+  const [renderState, setRenderState] = useState(false); // Rendering results state
+  const [fetchTextsIndex, setFetchTextsIndex] = useState(0); // Index used for fetching text animation
+  const fetchTexts = ["Fetching", "Fetching.", "Fetching..", "Fetching..."]; // Texts for fetching animation
+  const firstQuestion = "What do you want to learn about?"; // Initial question text
+  const [secondQuestion, setSecondQuestion] = useState(
+    "How do you want to know about"
+  ); // Second question text
 
+  // Effect to update fetch text animation
+  useEffect(() => {
     const intervalId = setInterval(() => {
       setFetchTextsIndex((prevIndex) => (prevIndex + 1) % fetchTexts.length);
-    }, 700); // Change text every 2 seconds (adjust as needed)
+    }, 700);
 
-    // Cleanup function to clear the interval when the component unmounts
     return () => clearInterval(intervalId);
   }, []);
 
-  function delay(ms) {
-    return new Promise((resolve) => {
-      setTimeout(resolve, ms);
-    });
-  }
+  // Effect to animate the first question text, starts when stage1Text is first initiated in the application
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setStage1Text(firstQuestion.slice(0, stage1Text.length + 1));
+    }, 80);
+    return () => clearTimeout(timeout);
+  }, [stage1Text]);
 
-  async function getResources(e) {
-    if (e.key == "Enter") {
+  // Effect to animate the second question text, start
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setStage2Text(secondQuestion.slice(0, stage2Text.length + 1));
+    }, 80);
+    return () => clearTimeout(timeout);
+  }, [stage2Text]);
+
+  // Functions
+
+  // Function to fetch and present findings
+  async function getAndPresentFindings(e) {
+    if (e.key === "Enter") {
       setStage("3");
-      let stateNew = state;
-      let resourceTypess = howInput.split(" ");
-      resourceTypess = resourceTypess.filter(
-        (word) =>
-          word !== "and" &&
-          word !== "," &&
-          word !== "or" &&
-          word !== "&" &&
-          word !== "through"
-      );
-      resourceTypess.forEach((type) => {
+      let stateNew = state; // Creates new state object to add collected findings to
+      const resourceTypes = howInput
+        .split(" ")
+        .filter(
+          (word) =>
+            word !== "and" &&
+            word !== "," &&
+            word !== "or" &&
+            word !== "&" &&
+            word !== "through"
+        );
+      resourceTypes.forEach((type) => {
         stateNew[type] = false;
       });
 
       for (const typeOf in stateNew) {
         await fetch("https://openai-api-uzyw.onrender.com/post", {
           method: "post",
-
           headers: {
             Accept: "application/json",
             "Content-Type": "application/json",
@@ -66,44 +90,29 @@ const Generator = () => {
             stateNew[typeOf] = data;
           });
       }
-
-      setState(stateNew);
-      setRenderState(true);
+      setState(stateNew); // Sets the new findings object into the state
+      setRenderState(true); // Renders findings state
       setFetchLearnButtonText("Learn Something Else");
     }
   }
 
+  // Function to reload the page and start learning something else
   function learnSomethingElse() {
     window.location.reload();
   }
 
-  const questionText = "What do you want to learn about?:";
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setText1(questionText.slice(0, text1.length + 1));
-    }, 80);
-    return () => clearTimeout(timeout);
-  }, [text1]);
-  const [secondQuestion, setSecondQuestion] = useState(
-    "How do you want to know about"
-  );
-  function nextStage(e) {
-    if (e.key == "Enter") {
+  // Function to initialize stage 2
+  function initialiseStage2(e) {
+    if (e.key === "Enter") {
       setStage("2");
-      setText2("");
-      setShowInput(false);
+      setStage2Text("");
       setSecondQuestion(
         "How would you prefer to learn about " + topicInput + "?:"
       );
     }
   }
 
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setText2(secondQuestion.slice(0, text2.length + 1));
-    }, 80);
-    return () => clearTimeout(timeout);
-  }, [text2]);
+  // Component JSX
   return (
     <div>
       {stage == "3" && renderState !== true ? (
@@ -113,37 +122,37 @@ const Generator = () => {
           style={{ display: stage != "3" ? "block" : "none" }}
           className="typedContainer"
         >
-          {stage == "1" ? (
-            <div className="questionContainer">{text1}</div>
-          ) : null}
-          {stage == "2" ? (
-            <div className="questionContainer">{text2}</div>
-          ) : null}
-          {text1 == questionText && stage == "1" ? (
+          {stage == "1" && (
+            <div className="questionContainer">{stage1Text}</div>
+          )}
+          {stage == "2" && (
+            <div className="questionContainer">{stage2Text}</div>
+          )}
+          {stage1Text == firstQuestion && stage == "1" && (
             <input
               style={{ width: topicInput.length + "ch" }}
               autoFocus
               className="input"
-              onKeyDown={nextStage}
+              onKeyDown={initialiseStage2}
               onChange={(e) => {
                 setTopicInput(e.target.value);
               }}
             ></input>
-          ) : null}
-          {stage == "2" && secondQuestion == text2 ? (
+          )}
+          {stage == "2" && secondQuestion == stage2Text && (
             <input
               style={{ width: howInput.length + "ch" }}
               className="input"
               autoFocus
-              onKeyDown={getResources}
+              onKeyDown={getAndPresentFindings}
               onChange={(e) => {
                 setHowInput(e.target.value);
               }}
             ></input>
-          ) : null}{" "}
+          )}{" "}
         </div>
       )}{" "}
-      {renderState ? (
+      {renderState && (
         <div className="resultsContainer">
           <div className="learnSomeThingElseButtonContainer">
             <button
@@ -172,8 +181,9 @@ const Generator = () => {
             </div>
           ))}
         </div>
-      ) : null}
+      )}
     </div>
   );
 };
+
 export default Generator;
