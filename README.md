@@ -2,13 +2,13 @@ Resource-Retrieval-Bot-Interface is designed to help you discover resources on a
 
 Features
 
-Search Functionality: 
+- Search Functionality: 
 Users can input their desired subject or topic into a search bar, and the app will retrieve relevant resources based on the query.
 
-AI-Powered Recommendations: 
+- AI-Powered Recommendations: 
 Utilizing OpenAI's technology, the app generates resource recommendations tailored to the user's search query, providing articles, blog posts, research papers, and more.
 
-Filtering Options: 
+- Filtering Options: 
 Users can refine their search results using filters such as relevance, date, source type (e.g., articles, papers), or even sentiment analysis to prioritize positive or negative content.
 
 Usage
